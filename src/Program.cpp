@@ -36,6 +36,17 @@ void Program::Update() {
 
     if (!startup && !paused && !gameOver && pauseFrames <= 0) {
         Enemy::ManageEnemies(player->hitBox);
+        for (auto& p : Enemy::enemies) {
+            if (p.second && p.second->pointsFlag) {//Code awards points and trips the flag for awarding points so they are only awarded once per enemy defeat
+                score += p.second->getScore();
+                p.second->pointsFlag = false;
+                if (score >= extraLifeThreshold && lives < 5) {
+                    lives++;
+                    extraLifeThreshold += 1000;
+                }
+                p.second = nullptr;
+            }
+        }
         StdEnemy::attackReset();
         ManageEnemyRespawns();
         player->update();
@@ -71,6 +82,8 @@ void Program::Update() {
 
 void Program::Draw() {
     background.Draw();
+    DrawText(TextFormat("Score: %i", score), 20, 20, 25, WHITE);//Adds a display for score
+    DrawText(TextFormat("Lives: %i", lives), 880, 20, 25, WHITE);//Adds a display for lives
     if (pauseFrames <= 0 && !gameOver) player->draw();
     for (Animation& a : Animation::animations) a.draw();
 
@@ -90,11 +103,12 @@ void Program::Draw() {
 }
 
 void Program::ManageEnemyRespawns() {
+    float respawnSpeedScaler = std::max(0.25f, 1.0f - (score / 3000.0f));//Code dictating the maximum allowed respawn speed based on current score
     delay = std::max(delay - 1, 0);
 
     respawnCooldown -= 1;
     if (respawnCooldown <= 0) {
-        respawnCooldown = 1080;
+        respawnCooldown = int(1080 * respawnSpeedScaler);//Code responsible for increasing enemy respawn speed
         for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies) {
             if (!p.second && p.first.second != 150) {
                 int eType = GetRandomValue(1, 3);
@@ -165,6 +179,15 @@ void Program::KeyInputs() {
         startup = false;
     }
 
+    //Score debugging feature
+    if (IsKeyPressed('K')) {
+        score += 500;
+        if (score >= extraLifeThreshold && lives < 5) {
+            lives++;
+            extraLifeThreshold += 1000;
+        }
+    }
+
     if (!startup && !paused && !gameOver && pauseFrames <= 0) player->keyInputs();
    
 }
@@ -198,5 +221,6 @@ void Program::Reset() {
     count = 0;
     delay = 0;
     lives = 3;
+    score = 0;//Resets score to 0 when game restarts
    }
 }

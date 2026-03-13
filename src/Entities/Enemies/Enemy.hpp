@@ -34,6 +34,8 @@ class Enemy {
         virtual void draw() = 0;
         virtual void update(std::pair<float, float> pos, HitBox target) = 0;
         virtual void attack(HitBox target) = 0;
+        bool pointsFlag = false;
+        virtual int getScore() { return 50; }//Sets the default score for defeating an enemy to 100
 
         void frameChange() {
             frameCooldown--;
@@ -61,11 +63,12 @@ class Enemy {
                     }
 
                     if (p.second->health <= 0) {
+                        p.second->pointsFlag = true;
                         PlaySound(SoundManager::dead);
                         Animation::animations.push_back(
                             Animation(p.second->position.first, p.second->position.second, 155, 0, 33, 33, 30, 30, 4, ImageManager::SpriteSheet)
                         );
-                        p.second = nullptr;
+                        //p.second = nullptr;//Moved to Program.cpp
                     }
                 }
             }

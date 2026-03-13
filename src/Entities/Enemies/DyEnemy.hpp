@@ -18,4 +18,5 @@ class DyEnemy : public Enemy {
         void draw() override;
         void update(std::pair<float, float> pos, HitBox target) override;
         void attack(HitBox target) override;
+        int getScore() override { return 200; }
 };

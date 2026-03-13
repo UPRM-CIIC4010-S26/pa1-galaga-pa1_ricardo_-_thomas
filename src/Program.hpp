@@ -19,12 +19,15 @@ class Program {
         int delay = 0;
         int lives = 3;
         int pauseFrames = 0;
+        int extraLifeThreshold = 1000;//Threshold for awarding extra lives
 
         bool startup = true;
         bool paused = false;
         bool gameOver = false;
 
     public:
+        inline static int score = 0;
+
         Program();
         
         void Update();
